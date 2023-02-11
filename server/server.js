@@ -4,16 +4,17 @@ var app = express();
 var http = require('http').Server(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: ['http://localhost:8080', 'https://admin.socket.io', 'https://fix-chat--fluffy-panda-da842f.netlify.app/'],
+        origin: '*',
         methods: ['GET', 'POST'],
         allowedHeaders: ["my-custom-header"],
         credentials: true
     },
 })
-var corsOptions = {
-    origin: 'https://fix-chat--fluffy-panda-da842f.netlify.app/',
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+// ['http://localhost:8080', 'https://admin.socket.io', 'https://fix-chat--fluffy-panda-da842f.netlify.app/']
+// var corsOptions = {
+//     origin: 'https://fix-chat--fluffy-panda-da842f.netlify.app/',
+//     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
 const port = process.env.PORT || 3000;
 
 let users = []
