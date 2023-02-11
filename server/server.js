@@ -10,6 +10,10 @@ const io = require('socket.io')(http, {
         credentials: true
     },
 })
+var corsOptions = {
+    origin: 'https://fix-chat--fluffy-panda-da842f.netlify.app/',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
 const port = process.env.PORT || 3000;
 
 let users = []
@@ -82,7 +86,7 @@ io.on('connection', (socket) => {
     });
 });
 
-app.get('/products/:id', cors(), function (req, res, next) {
+app.get('/products/:id', cors(corsOptions), function (req, res, next) {
     res.json({msg: 'This is CORS-enabled for a Single Route'})
 })
 http.listen(3000, function () {
