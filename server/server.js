@@ -1,21 +1,116 @@
-var express = require('express');
-// var cors = require('cors')
-var app = express();
-var http = require('http').Server(app);
-const io = require('socket.io')(http, {
+// const { createServer } = require("http");
+// const { Server } = require("socket.io");
+
+// const httpServer = createServer();
+
+// // var express = require('express');
+// // // var cors = require('cors')
+// // var app = express();
+// // var http = require('http').Server(app);
+// const io = new Server('socket.io')(httpServer, {
+//     cors: {
+//         origin: true
+//         // allowedHeaders: ["my-custom-header"]
+//     },
+// })
+// // ['http://localhost:8080', 'https://admin.socket.io', 'https://fix-chat--fluffy-panda-da842f.netlify.app']
+// const port = process.env.PORT || 3000;
+
+// let users = []
+// let allrooms = []
+
+// io.on('connection', (socket) => {
+//     // console.log(`User connected ${socket.id}`);
+
+//     socket.on('chatMessage', (msg, room) => {
+//         const user = users.find(user => user.id === socket.id)
+//         io.to(room).emit('message', user.username, msg)
+//     })
+    
+//     socket.on('join-room', (username, room) => {
+//         const user = {
+//             username,
+//             room,
+//             id: socket.id,
+//         }
+//         users.push(user)
+//         if(user.room){
+//             const rooms = {
+//                 room,
+//                 count: 0,
+//             }
+//             const id = allrooms.findIndex(name => name.room === room)
+//             if (id == -1) {
+//                 // rooms.count++
+//                 console.log(rooms);
+//                 allrooms.push(rooms)
+//                 console.log(allrooms);
+//             } else {
+//                 // allrooms[id].count++
+//             }
+//             console.log('room: '+ room);
+//             socket.join(room)
+//             socket.emit('create-room', room)
+//             io.to(room).emit('all-user-room', users)
+//         }
+
+//     })
+//     io.emit('room-list', allrooms)
+
+//     // console.log(io.sockets.adapter.rooms);
+
+//     // console.log(socket.rooms);
+
+//     // console.log(Object.keys(io.engine.clients)) //all users
+    
+
+//     // console.log(socket.rooms);
+
+//     socket.on('disconnect', () => {
+//         const index = users.findIndex(user => user.id === socket.id)
+//         if (index !== -1) {
+//             // for (let obj of allrooms) {
+//             //     if (obj.room === users[index].room) {
+//             //         obj.count--
+//             //         break
+//             //     }
+//             // }
+//             // const delRoom = allrooms.findIndex(room => room.count === 0)
+//             // if (delRoom !== -1) {
+//             //     allrooms.splice(index, 1);
+//             // }
+//             users.splice(index, 1);
+//         }
+//         console.log(allrooms);
+//         // console.log(`Socket disconnect! ${socket.id}`);
+//     });
+// });
+
+// // app.get('/products/:id', cors(corsOptions), function (req, res, next) {
+// //     res.json({msg: 'This is CORS-enabled for a Single Route'})
+// // })
+// io.listen(port, function () {
+//     console.log('CORS-enabled web server listening on port '+ port)
+// })
+// // http.listen(port, function() {
+// //     console.log('listening on *: ' + port);
+// // });
+
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+
+const httpServer = createServer();
+
+const io = new Server(httpServer, {
     cors: {
-        origin: true
-        // allowedHeaders: ["my-custom-header"]
-    },
-})
-// ['http://localhost:8080', 'https://admin.socket.io', 'https://fix-chat--fluffy-panda-da842f.netlify.app']
+      origin: true
+    }
+});
+
 const port = process.env.PORT || 3000;
 
-let users = []
-let allrooms = []
-
-io.on('connection', (socket) => {
-    // console.log(`User connected ${socket.id}`);
+io.on("connection", (socket) => {
+        // console.log(`User connected ${socket.id}`);
 
     socket.on('chatMessage', (msg, room) => {
         const user = users.find(user => user.id === socket.id)
@@ -81,12 +176,7 @@ io.on('connection', (socket) => {
     });
 });
 
-// app.get('/products/:id', cors(corsOptions), function (req, res, next) {
-//     res.json({msg: 'This is CORS-enabled for a Single Route'})
-// })
-http.listen(port, function () {
+
+io.listen(port, function () {
     console.log('CORS-enabled web server listening on port '+ port)
 })
-// http.listen(port, function() {
-//     console.log('listening on *: ' + port);
-// });
