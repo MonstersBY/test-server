@@ -1,7 +1,8 @@
 var express = require('express');
+var cors = require('cors')
 var app = express();
-var http = require('http').Server(app);
-const io = require('socket.io')(http, {
+// var http = require('http').Server(app);
+const io = require('socket.io')(3000, {
     cors: {
         origin: ['http://localhost:8080', 'https://admin.socket.io', 'https://fix-chat--fluffy-panda-da842f.netlify.app/'],
         methods: ['GET', 'POST'],
@@ -81,7 +82,12 @@ io.on('connection', (socket) => {
     });
 });
 
-
-http.listen(port, function() {
-    console.log('listening on *: ' + port);
-});
+app.get('/products/:id', cors(), function (req, res, next) {
+    res.json({msg: 'This is CORS-enabled for a Single Route'})
+})
+app.listen(80, function () {
+    console.log('CORS-enabled web server listening on port 80')
+})
+// http.listen(port, function() {
+//     console.log('listening on *: ' + port);
+// });
