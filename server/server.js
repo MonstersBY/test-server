@@ -1,7 +1,7 @@
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-const io = require('socket.io')(http, {
+// var express = require('express');
+// var app = express();
+// var http = require('http').Server(app);
+const io = require('socket.io')(3000, {
     cors: {
         origin: ['http://localhost:8080', 'https://admin.socket.io'],
         methods: ['GET', 'POST'],
@@ -80,6 +80,6 @@ io.on('connection', (socket) => {
 });
 
 
-http.listen(port, function() {
-    console.log('listening on *: ' + port);
-});
+// http.listen(port, function() {
+//     console.log('listening on *: ' + port);
+// });
