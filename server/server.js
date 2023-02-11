@@ -109,8 +109,11 @@ const io = new Server(httpServer, {
 
 const port = process.env.PORT || 3000;
 
+let users = []
+let allrooms = []
+
 io.on("connection", (socket) => {
-        // console.log(`User connected ${socket.id}`);
+        console.log(`User connected ${socket.id}`);
 
     socket.on('chatMessage', (msg, room) => {
         const user = users.find(user => user.id === socket.id)
