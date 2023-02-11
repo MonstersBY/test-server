@@ -6,8 +6,7 @@ const io = require('socket.io')(http, {
     cors: {
         origin: ['http://localhost:8080', 'https://admin.socket.io', 'https://fix-chat--fluffy-panda-da842f.netlify.app'],
         methods: ['GET', 'POST'],
-        allowedHeaders: ["my-custom-header"],
-        credentials: true
+        allowedHeaders: ["my-custom-header"]
     },
 })
 // ['http://localhost:8080', 'https://admin.socket.io', 'https://fix-chat--fluffy-panda-da842f.netlify.app/']
