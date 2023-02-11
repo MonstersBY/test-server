@@ -4,7 +4,7 @@ var app = express();
 var http = require('http').Server(app);
 const io = require('socket.io')(http, {
     cors: {
-        origin: '*'
+        origin: true
         // allowedHeaders: ["my-custom-header"]
     },
 })
