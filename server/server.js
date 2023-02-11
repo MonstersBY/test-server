@@ -103,7 +103,7 @@ const httpServer = createServer();
 
 const io = new Server(httpServer, {
     cors: {
-      origin: true
+      origin: ['http://localhost:8080', 'https://admin.socket.io', 'https://fluffy-panda-da842f.netlify.app']
     }
 });
 
