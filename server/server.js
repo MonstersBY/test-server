@@ -82,10 +82,10 @@ io.on('connection', (socket) => {
     });
 });
 
-// app.get('/products/:id', cors(), function (req, res, next) {
-//     res.json({msg: 'This is CORS-enabled for a Single Route'})
-// })
-http.listen(port, function () {
+app.get('/products/:id', cors(), function (req, res, next) {
+    res.json({msg: 'This is CORS-enabled for a Single Route'})
+})
+http.listen(3000, function () {
     console.log('CORS-enabled web server listening on port '+ port)
 })
 // http.listen(port, function() {
