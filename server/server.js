@@ -117,7 +117,7 @@ io.on("connection", (socket) => {
 
     socket.on('chatMessage', (msg, room) => {
         const user = users.find(user => user.id === socket.id)
-        io.to(room).emit('message', user.username, msg)
+        if (user) io.to(room).emit('message', user.username, msg)
     })
     
     socket.on('join-room', (username, room) => {
