@@ -117,6 +117,7 @@ io.on("connection", (socket) => {
 
     socket.on('chatMessage', (msg, room) => {
         const user = users.find(user => user.id === socket.id)
+        console.log(user);
         if (user) io.to(room).emit('message', user.username, msg)
     })
     
