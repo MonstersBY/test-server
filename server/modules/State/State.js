@@ -1,15 +1,12 @@
-// import { IPlayerInfo, IHex, IPlayerHand } from "./types";
 import MapGenerator from "./MapGenerator.js"
-import { getEmptyPlayer } from "./EmptyPlayer.js"
-// const { MapGenerator } = require("./MapGenerator");
-// const { getEmptyPlayer } = require("./EmptyPlayer");
-// import View from "../../modules/View/View";
+import roadCounter from "./RoadCounter.js";
 
 export default class State {
-  constructor (){
-    // public view?: View,
+  constructor() {
     this.playersCount = 4;
-    this.gameMode = "newbie";
+    this.gameMode = "classic";
+    this.gameMap = "newbie";
+    this.turn = -1;
     this.foundingStage = true;
     this.activePlayer = 0;
     this.diceRoll = [1, 1];
@@ -22,81 +19,93 @@ export default class State {
   }
 
   initialState() {
-    this.mapObject = this.generateMap(this.gameMode);
-    this.playersInfo = this.generatePlayers(this.playersCount);
-    this.developmentDeck = this.generateDevelopmentDeck();
-
+    const generator = new MapGenerator(); //
+    this.mapObject = JSON.parse(JSON.stringify(generator.generateMap(this.gameMap))); //разрываем связь
+    this.playersInfo = JSON.parse(JSON.stringify(generator.generatePlayers(this.playersCount)));
+    this.developmentDeck = JSON.parse(JSON.stringify(generator.generateDevelopmentDeck()));
     this.activePlayer = 0;
     this.foundingStage = true;
   }
 
-  // public updateMap() {
-  //   this.view?.renderFullMap(this.mapObject);
-  // }
-
-  // Generation. Works 1 time
-  generateMap(mode) {
-    const generator = new MapGenerator();
-    return mode === "newbie" ? generator.getNewbieMap() : generator.getRandomMap();
-  }
-
-  generatePlayers(players) {
-    // const colors = ["red", "blue", "green", "orange"];
-    const playersInfo = [];
-    for (let i = 0; i < players; i++) {
-      playersInfo.push(getEmptyPlayer(i));
-    }
-    return playersInfo;
-  }
-  
-  generateDevelopmentDeck() {
-    const development = ["road", "plenty", "monopoly"];
-    const victory = Array(5).fill("victory");
-    const knights = Array(14).fill("knights");
-    const deck = [...knights, ...victory, ...development, ...development];
-    const shuffle = new MapGenerator().shuffle;
-    return shuffle(deck);
-  }
-
   // Turn based events
-  setDiceRoll(roll) {
+
+  // setDiceRoll(roll) {
+  //   this.diceRoll = roll;
+  // }
+  /* setDiceRoll(roll) {
     this.diceRoll = roll;
+    this.addResoursesThisTurn(roll[0]+roll[1]);
   }
+ */
 
-  addResoursesThisTurn(dice) {
-    if (this.mapObject && this.playersInfo) {
 
+  addResoursesThisTurn(dice, map, players) {
+    if (map  && players) {
       let currentHexes = []
       for (let i = 0; i < this.HEX_COUNT; i++) {
-        if (this.mapObject[i].token === dice && !this.mapObject[i].robber) {
+        if (map[i].token === dice && !map[i].robber) {
           currentHexes.push(i);
         }
       }
 
-      for (const player of this.playersInfo) {
+      for (const player of players) {
         for (let i = 0; i < player.hexes.length; i++) {
           for (let j = 0; j < currentHexes.length; j++) {
             if (player.hexes[i] === currentHexes[j]) {
-              switch (this.mapObject[j].type) {
+              switch (map[currentHexes[j]].type) {
                 case "hills":
                   player.hand.resources.brick += 1;
-                break;
+                  break;
                 case "fields":
                   player.hand.resources.grain += 1;
-                break;
+                  break;
                 case "forest":
                   player.hand.resources.lumber += 1;
-                break;
+                  break;
                 case "mountains":
                   player.hand.resources.ore += 1;
-                break;
+                  break;
                 case "pasture":
                   player.hand.resources.wool += 1;
-                break;
+                  break;
               }
             }
           }
         }
+      }
+    }
+  }
+
+  addResoursesFirstSettlement(map, player) {
+    let hex
+
+    const arrMap = [this.mapObject[Number(player.settlements[1].split("_")[0])].settlement_N, this.mapObject[Number(player.settlements[1].split("_")[0])].settlement_S]
+    for (let i = 0; i < arrMap.length; i++) {
+      if (arrMap[i]){
+        if (arrMap[i].id == player.settlements[1]) {
+          hex = arrMap[i].nextHexes
+          break
+        }
+      }    
+    }
+    
+    for (let i = 0; i < hex.length; i++) {
+      switch (map[hex[i]].type) {
+        case "hills":
+          player.hand.resources.brick += 1;
+        break;
+        case "fields":
+          player.hand.resources.grain += 1;
+        break;
+        case "forest":
+          player.hand.resources.lumber += 1;
+        break;
+        case "mountains":
+          player.hand.resources.ore += 1;
+        break;
+        case "pasture":
+          player.hand.resources.wool += 1;
+        break;
       }
     }
   }
@@ -148,8 +157,9 @@ export default class State {
     player.hand.resources[get] += 1;
   }
 
-  makeExchangeProposal(player) {}// !!!
+  makeExchangeProposal(player) { }// !!!
 
+  // Building
   setNewSettlement(player, id) {
     // add to mapObject
     const hex = id.split("_")[0];
@@ -180,9 +190,7 @@ export default class State {
     player.settlements.push(id);
     const nextHexes = this.mapObject[hex][hode].nextHexes;
     player.hexes.push(...nextHexes);
-    // player.hexes.sort();
     player.avalible.push(...nearNodes);
-    // console.log(player.avalible);
   }
 
   setNewCity(player, id) {
@@ -196,11 +204,6 @@ export default class State {
     player.cities.push(id);
     const nextHexes = this.mapObject[hex][hode].nextHexes;
     player.hexes.push(...nextHexes);
-    // player.hexes.sort();
-
-    console.log(player.hexes, "hexes")
-    console.log(player.cities, "cities")
-    console.log(player.settlements, "settlements")
   }
 
   setNewRoad(player, id) {
@@ -224,70 +227,204 @@ export default class State {
     // add to playerInfo
     player.roads.push(id);
     player.avalible.push(...nearRoads, ...nearNodes);
-    // console.log(player.avalible);
+
+    // this.calculateRoadChain(player, id, nearNodes);
   }
 
+  // Development
   buyDevelopmentCard(player) {
     const resources = player.hand.resources;
     const development = player.hand.development;
     if (resources.grain > 0 &&
-        resources.ore > 0 &&
-        resources.wool > 0) {
-          resources.grain -= 1;
-          resources.ore -= 1;
-          resources.wool -= 1;
-          const topCard = this.developmentDeck.pop();
-          switch (topCard) {
-            case "road":
-              development.road += 1;
-            break;
-            case "plenty":
-              development.plenty += 1;
-            break;
-            case "monopoly":
-              development.monopoly += 1;
-            break;
-            case "knights":
-              development.knights += 1;
-            break;
-            case "victory":
-              development.victory += 1;
-            break;
-          }
+      resources.ore > 0 &&
+      resources.wool > 0) {
+      resources.grain -= 1;
+      resources.ore -= 1;
+      resources.wool -= 1;
+      const topCard = this.developmentDeck.pop();
+      switch (topCard) {
+        case "road":
+          development.road += 1;
+          break;
+        case "plenty":
+          development.plenty += 1;
+          break;
+        case "monopoly":
+          development.monopoly += 1;
+          break;
+        case "knights":
+          development.knights += 1;
+          break;
+        case "victory":
+          development.victory += 1;
+          break;
+      }
     }
   }
 
-  playKnigthCard(player) {}// !!!
+  playKnigthCard(player) { }// !!!
 
-  playMonopolyCard(player) {}// !!!
+  playMonopolyCard(player) { }// !!!
 
-  playPlentyCard(player) {}// !!!
+  playPlentyCard(player) { }// !!!
 
-  playRoadCard(player) {}// !!!
+  playRoadCard(player) { }// !!!
 
   // Tecnical checks and events
-  isAnyResourse(res) {
+  #isAnyResourse(res) {
     return res.brick + res.grain + res.lumber + res.ore + res.wool;
   }
 
-  chooseRandomResourse(res) {
+  #chooseRandomResourse(res) {
     const randomNumber = new MapGenerator().randomNumber;
     const resources = ["grain", "wool", "ore", "lumber", "brick"];
     let chosen = 0;
     let i;
     do {
-      i = randomNumber(0, 4);
+      i = Math.floor(Math.random() * 5);
       chosen = res[resources[i]];
     }
     while (!chosen)
     return resources[i];
   }
 
+  countCardRobber(players) {
+    for (let i = 0; i < players.length; i++) {
+      let sum = 0;
+      for (let cards of Object.values(players[i].hand.resources)) {
+        sum += cards;
+      }
+      if (sum > 7) {
+        this.deleteCard(players[i], Math.ceil(sum/2))
+      }
+    }
+  }
+
+  deleteCard(player, sum) {
+    const resources = ["grain", "wool", "ore", "lumber", "brick"];
+    for (let i = 0; i < sum;) {
+      const j = Math.floor(Math.random() * 5)
+      switch (resources[j]) {
+        case 'grain':
+          if(player.hand.resources.grain) {
+            player.hand.resources.grain--
+            i++
+          }
+          break;
+        case 'wool':
+          if(player.hand.resources.wool) {
+            player.hand.resources.wool--
+            i++
+          }
+          break;
+        case 'ore':
+          if(player.hand.resources.ore) {
+            player.hand.resources.ore--
+            i++
+          }
+          break;
+        case 'lumber':
+          if(player.hand.resources.lumber) {
+            player.hand.resources.lumber--
+            i++
+          }
+          break;
+        case 'brick':
+          if(player.hand.resources.brick) {
+            player.hand.resources.brick--
+            i++
+          }
+          break;
+      }
+    }
+  }
+
+  monopolyCard(players, player, resource){//take ALL res
+    let sum = 0
+    for (let i = 0; i < players.length; i++) {
+      if(players[i].name != player.name) {
+        switch (resource) {
+          case 'grain':
+            if(players[i].hand.resources.grain) {
+              sum += players[i].hand.resources.grain
+              players[i].hand.resources.grain = 0
+            }
+            break;
+          case 'wool':
+            if(players[i].hand.resources.wool) {
+              sum += players[i].hand.resources.wool
+              players[i].hand.resources.wool = 0
+            }
+            break;
+          case 'ore':
+            if(players[i].hand.resources.ore) {
+              sum += players[i].hand.resources.ore
+              players[i].hand.resources.ore = 0
+            }
+            break;
+          case 'lumber':
+            if(players[i].hand.resources.lumber) {
+              sum += players[i].hand.resources.lumber
+              players[i].hand.resources.lumber = 0
+            }
+            break;
+          case 'brick':
+            if(players[i].hand.resources.brick) {
+              sum += players[i].hand.resources.brick
+              players[i].hand.resources.brick = 0
+            }
+            break;
+        }
+      }
+    }
+    player.hand.development.monopoly--
+    switch (resource) {
+      case 'grain':
+        player.hand.resources.grain += sum
+        break;
+      case 'wool':
+        player.hand.resources.wool += sum
+        break;
+      case 'ore':
+        player.hand.resources.ore += sum
+        break;
+      case 'lumber':
+        player.hand.resources.lumber += sum
+        break;
+      case 'brick':
+        player.hand.resources.brick += sum
+        break;
+    }
+  }
+
+  plentyCard(player, resources){
+    player.hand.development.plenty--
+    for (let i = 0; i < resources.length; i++) {
+      switch (resources[i]) {
+        case 'grain':
+          player.hand.resources.grain++
+          break;
+        case 'wool':
+          player.hand.resources.wool++
+          break;
+        case 'ore':
+          player.hand.resources.ore++
+          break;
+        case 'lumber':
+          player.hand.resources.lumber++
+          break;
+        case 'brick':
+          player.hand.resources.brick++
+          break;
+      }
+    }
+  }
+
   transferOneToAnother(player, victimColor) {
     for (const playerVictim of this.playersInfo) {
       if (playerVictim.color === victimColor) {
-        if (this.isAnyResourse(playerVictim.hand.resources)) {
-          const type = this.chooseRandomResourse(playerVictim.hand.resources);
+        if (this.#isAnyResourse(playerVictim.hand.resources)) {
+          const type = this.#chooseRandomResourse(playerVictim.hand.resources);
           playerVictim.hand.resources[type] -= 1;
           player.hand.resources[type] += 1;
         };
@@ -295,27 +432,39 @@ export default class State {
     }
   }
 
-  calculateRoadChain(player) {// !!!
-    if (player.roads.length > 4) {
-      // better start from top-left
+  calculateRoadChain(map, playerInfo, id) {
+    playerInfo.roadChain = roadCounter(map, playerInfo.color, id);
+  }
+
+  calculateMaxRoadChain(map, playersInfo) {
+    for (const player of playersInfo) {
+      if (map.longestRoad < 5 && player.roadChain === 5) {
+        player.longestRoad = true;
+        map.longestRoad = 5;
+      }
+      if (map.longestRoad >= 5 && player.roadChain > map.longestRoad) {
+        for (const player of this.playersInfo) {
+          player.longestRoad = false;
+        }
+        map.longestRoad = player.roadChain;
+        player.longestRoad = true;
+      }
     }
   }
 
-  calculateArmySize() {
-    for (const player of this.playersInfo) {
-      if (this.largestArmy < 3 && player.armySize === 3) {
+  calculateMaxArmySize(map, playersInfo) {
+    for (const player of playersInfo) {
+      if (map.largestArmy < 3 && player.armySize === 3) {
         player.largestArmy = true;
-        this.largestArmy = 3;
+        map.largestArmy = 3;
       }
-      if (this.largestArmy >= 3 && player.armySize > this.largestArmy) {
-        for (const player of this.playersInfo) {
+      if (map.largestArmy >= 3 && player.armySize > map.largestArmy) {
+        for (const player of playersInfo) {
           player.largestArmy = false;
         }
-        this.largestArmy = player.armySize;
-        player.largestArmy = false;
+        map.largestArmy = player.armySize;
+        player.largestArmy = true;
       }
     }
   }
-
 }
-
