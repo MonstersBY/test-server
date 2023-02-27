@@ -237,6 +237,9 @@ io.on("connection", (socket) => {
         io.to(room).emit('Change-playerInfo', allGame.get(room).playersInfo)
     })
 
+    socket.on('updateMapFirst', (room) => {
+        socket.emit('renderFullMapView', allGame.get(room).mapObject)
+    })
     socket.on('updateMap', (room) => {
         io.to(room).emit('renderFullMapView', allGame.get(room).mapObject)
     })
