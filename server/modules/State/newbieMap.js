@@ -332,7 +332,7 @@ const newbieMap = [
       id: "12_settlement_N",
       player: false,
       city: false,
-      nextHexes: [6],
+      nextHexes: [6, 7, 12],
       nextNodes: ["12_road_N", "7_road_W", "7_road_S"],
     },
     road_N: {
@@ -390,7 +390,7 @@ const newbieMap = [
       id: "13_settlement_S",
       player: false,
       city: false,
-      nextHexes: [13, 18, 19],
+      nextHexes: [13, 20, 19],
       nextNodes: ["13_road_S", "20_road_N", "20_road_W"],
     },
     robber: false,
