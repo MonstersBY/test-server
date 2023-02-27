@@ -1,5 +1,5 @@
 import newbieMap from "./newbieMap.js"
-import { getEmptyPlayer } from "./emptyPlayer.js"
+import { getEmptyPlayer } from "./EmptyPlayer.js"
 
 export default class MapGenerator {
   constructor(){
