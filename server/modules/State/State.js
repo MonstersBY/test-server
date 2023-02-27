@@ -27,18 +27,6 @@ export default class State {
     this.foundingStage = true;
   }
 
-  // Turn based events
-
-  // setDiceRoll(roll) {
-  //   this.diceRoll = roll;
-  // }
-  /* setDiceRoll(roll) {
-    this.diceRoll = roll;
-    this.addResoursesThisTurn(roll[0]+roll[1]);
-  }
- */
-
-
   addResoursesThisTurn(dice, map, players) {
     if (map  && players) {
       let currentHexes = []
@@ -188,6 +176,9 @@ export default class State {
 
     // add to playerInfo
     player.settlements.push(id);
+    if (this.mapObject[hex][hode].harbor) {
+      player.harbors.push(this.mapObject[hex][hode].harbor);
+    }
     const nextHexes = this.mapObject[hex][hode].nextHexes;
     player.hexes.push(...nextHexes);
     player.avalible.push(...nearNodes);
@@ -227,8 +218,6 @@ export default class State {
     // add to playerInfo
     player.roads.push(id);
     player.avalible.push(...nearRoads, ...nearNodes);
-
-    // this.calculateRoadChain(player, id, nearNodes);
   }
 
   // Development
@@ -261,14 +250,6 @@ export default class State {
       }
     }
   }
-
-  playKnigthCard(player) { }// !!!
-
-  playMonopolyCard(player) { }// !!!
-
-  playPlentyCard(player) { }// !!!
-
-  playRoadCard(player) { }// !!!
 
   // Tecnical checks and events
   #isAnyResourse(res) {
@@ -339,7 +320,7 @@ export default class State {
     }
   }
 
-  monopolyCard(players, player, resource){//take ALL res
+  monopolyCard(players, player, resource){
     let sum = 0
     for (let i = 0; i < players.length; i++) {
       if(players[i].name != player.name) {
@@ -430,10 +411,6 @@ export default class State {
         };
       }
     }
-  }
-
-  calculateRoadChain(map, playerInfo, id) {
-    playerInfo.roadChain = roadCounter(map, playerInfo.color, id);
   }
 
   calculateMaxRoadChain(map, playersInfo) {

@@ -61,6 +61,40 @@ export default class MapGenerator {
         }
       }
     }
+
+    newMap[0].settlement_S.harbor = newMap[0].harbor;
+    newMap[5].settlement_N.harbor = newMap[0].harbor;
+
+    newMap[6].settlement_N.harbor = newMap[2].harbor;
+    newMap[2].settlement_S.harbor = newMap[2].harbor;
+    newMap[7].settlement_N.harbor = newMap[2].harbor;
+
+    newMap[3].settlement_S.harbor = newMap[8].harbor;
+    newMap[13].settlement_N.harbor = newMap[8].harbor;
+    newMap[8].settlement_S.harbor = newMap[8].harbor;
+
+    newMap[14].settlement_S.harbor = newMap[21].harbor;
+    newMap[27].settlement_N.harbor = newMap[21].harbor;
+
+    newMap[32].settlement_N.harbor = newMap[32].harbor;
+    newMap[26].settlement_S.harbor = newMap[32].harbor;
+    newMap[36].settlement_N.harbor = newMap[32].harbor;
+
+    newMap[35].settlement_N.harbor = newMap[35].harbor;
+    newMap[31].settlement_S.harbor = newMap[35].harbor;
+    newMap[30].settlement_S.harbor = newMap[35].harbor;
+
+    newMap[33].settlement_N.harbor = newMap[33].harbor;
+    newMap[29].settlement_S.harbor = newMap[33].harbor;
+
+    newMap[22].settlement_N.harbor = newMap[22].harbor;
+    newMap[28].settlement_N.harbor = newMap[22].harbor;
+    newMap[16].settlement_S.harbor = newMap[22].harbor;
+
+    newMap[9].settlement_S.harbor = newMap[9].harbor;
+    newMap[16].settlement_N.harbor = newMap[9].harbor;
+    newMap[4].settlement_S.harbor = newMap[9].harbor;
+
     return newMap;
   }
 

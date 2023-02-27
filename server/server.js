@@ -161,6 +161,7 @@ io.on("connection", (socket) => {
         const index = allGame.get(room).playersInfo.findIndex(findUser => findUser.name === player.name)
         allGame.get(room).playersInfo[index] = player
         allGame.get(room).playersInfo[index].settlementsStock--
+
         if (allGame.get(room).turn == 0) {
             allGame.get(room).addResoursesFirstSettlement(allGame.get(room).mapObject, allGame.get(room).playersInfo[index])
         }
@@ -186,8 +187,7 @@ io.on("connection", (socket) => {
         }
         allGame.get(room).playersInfo[index].roadChain = roadCounter(
             allGame.get(room).mapObject,
-            player.color, 
-            id
+            player,
         );
         io.to(room).emit('Change-playerInfo', allGame.get(room).playersInfo)
     })
@@ -227,7 +227,7 @@ io.on("connection", (socket) => {
         allGame.get(room).playersInfo[index] = player
         io.to(room).emit('Change-playerInfo', allGame.get(room).playersInfo)
     })
-    socket.on('del-card-robber', (player, room) =>{
+    socket.on('updateHand', (player, room) =>{
         const index = allGame.get(room).playersInfo.findIndex(findUser => findUser.name === player.name)
         allGame.get(room).playersInfo[index] = player
 
