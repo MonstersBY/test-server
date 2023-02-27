@@ -1,5 +1,4 @@
 import MapGenerator from "./MapGenerator.js"
-import roadCounter from "./RoadCounter.js";
 
 export default class State {
   constructor() {
@@ -7,7 +6,6 @@ export default class State {
     this.gameMode = "classic";
     this.gameMap = "newbie";
     this.turn = -1;
-    this.foundingStage = true;
     this.activePlayer = 0;
     this.diceRoll = [1, 1];
     this.playersInfo = [];
@@ -19,12 +17,10 @@ export default class State {
   }
 
   initialState() {
-    const generator = new MapGenerator(); //
-    this.mapObject = JSON.parse(JSON.stringify(generator.generateMap(this.gameMap))); //разрываем связь
+    const generator = new MapGenerator();
+    this.mapObject = JSON.parse(JSON.stringify(generator.generateMap(this.gameMap)));
     this.playersInfo = JSON.parse(JSON.stringify(generator.generatePlayers(this.playersCount)));
     this.developmentDeck = JSON.parse(JSON.stringify(generator.generateDevelopmentDeck()));
-    this.activePlayer = 0;
-    this.foundingStage = true;
   }
 
   addResoursesThisTurn(dice, map, players) {
@@ -35,7 +31,6 @@ export default class State {
           currentHexes.push(i);
         }
       }
-
       for (const player of players) {
         for (let i = 0; i < player.hexes.length; i++) {
           for (let j = 0; j < currentHexes.length; j++) {
@@ -65,18 +60,20 @@ export default class State {
   }
 
   addResoursesFirstSettlement(map, player) {
-    let hex
-
-    const arrMap = [this.mapObject[Number(player.settlements[1].split("_")[0])].settlement_N, this.mapObject[Number(player.settlements[1].split("_")[0])].settlement_S]
+    const hex = [];
+    const arrMap = [
+      this.mapObject[Number(player.settlements[1].split("_")[0])].settlement_N,
+      this.mapObject[Number(player.settlements[1].split("_")[0])].settlement_S
+    ]
     for (let i = 0; i < arrMap.length; i++) {
-      if (arrMap[i]){
+      if (arrMap[i]) {
         if (arrMap[i].id == player.settlements[1]) {
-          hex = arrMap[i].nextHexes
-          break
+          hex.push(...arrMap[i].nextHexes);
+          break;
         }
-      }    
+      }
     }
-    
+
     for (let i = 0; i < hex.length; i++) {
       switch (map[hex[i]].type) {
         case "hills":
@@ -108,44 +105,26 @@ export default class State {
     return points >= 10;
   }
 
-  isDiscount(player, type) {
-    return player.harbors.some(harbor => harbor === type);
-  }
-
   // Player actions
-  setRobber(player, id) {
+  setRobber(map, id) {
     const i = id.split("_")[1];
-    if (this.mapObject) {
-      this.mapObject.forEach((hex) => {
+    if (map) {
+      map.forEach((hex) => {
         hex.robber = false;
       })
-      this.mapObject[i].robber = true;
+      map[i].robber = true;
     }
-    let roads = [...this.mapObject[i].settlement_N.nextNodes, ...this.mapObject[i].settlement_S.nextNodes];
+    let roads = [...map[i].settlement_N.nextNodes, ...map[i].settlement_S.nextNodes];
     roads = roads.filter(e => e.split("_")[2] !== "W");
     let settlementsToRob = [];
     roads.forEach(road => {
       const hex = road.split("_")[0];
       const hode = "road_" + road.split("_")[2];
-      settlementsToRob.push(...this.mapObject[hex][hode].nextNodes);
+      settlementsToRob.push(...map[hex][hode].nextNodes);
     })
     settlementsToRob = [...new Set(settlementsToRob)];
     return settlementsToRob;
   }
-
-  exchangeResourseBank(player, lose, get) {
-    let number = 4;
-    if (this.isDiscount(player, "all")) {
-      number = 3;
-    }
-    if (this.isDiscount(player, lose)) {
-      number = 2;
-    }
-    player.hand.resources[lose] -= number;
-    player.hand.resources[get] += 1;
-  }
-
-  makeExchangeProposal(player) { }// !!!
 
   // Building
   setNewSettlement(player, id) {
@@ -251,24 +230,6 @@ export default class State {
     }
   }
 
-  // Tecnical checks and events
-  #isAnyResourse(res) {
-    return res.brick + res.grain + res.lumber + res.ore + res.wool;
-  }
-
-  #chooseRandomResourse(res) {
-    const randomNumber = new MapGenerator().randomNumber;
-    const resources = ["grain", "wool", "ore", "lumber", "brick"];
-    let chosen = 0;
-    let i;
-    do {
-      i = Math.floor(Math.random() * 5);
-      chosen = res[resources[i]];
-    }
-    while (!chosen)
-    return resources[i];
-  }
-
   countCardRobber(players) {
     for (let i = 0; i < players.length; i++) {
       let sum = 0;
@@ -326,54 +287,54 @@ export default class State {
       if(players[i].name != player.name) {
         switch (resource) {
           case 'grain':
-            if(players[i].hand.resources.grain) {
-              sum += players[i].hand.resources.grain
-              players[i].hand.resources.grain = 0
+            if (players[i].hand.resources.grain) {
+              sum += players[i].hand.resources.grain;
+              players[i].hand.resources.grain = 0;
             }
             break;
           case 'wool':
-            if(players[i].hand.resources.wool) {
-              sum += players[i].hand.resources.wool
-              players[i].hand.resources.wool = 0
+            if (players[i].hand.resources.wool) {
+              sum += players[i].hand.resources.wool;
+              players[i].hand.resources.wool = 0;
             }
             break;
           case 'ore':
-            if(players[i].hand.resources.ore) {
-              sum += players[i].hand.resources.ore
-              players[i].hand.resources.ore = 0
+            if (players[i].hand.resources.ore) {
+              sum += players[i].hand.resources.ore;
+              players[i].hand.resources.ore = 0;
             }
             break;
           case 'lumber':
-            if(players[i].hand.resources.lumber) {
-              sum += players[i].hand.resources.lumber
-              players[i].hand.resources.lumber = 0
+            if (players[i].hand.resources.lumber) {
+              sum += players[i].hand.resources.lumber;
+              players[i].hand.resources.lumber = 0;
             }
             break;
           case 'brick':
-            if(players[i].hand.resources.brick) {
-              sum += players[i].hand.resources.brick
-              players[i].hand.resources.brick = 0
+            if (players[i].hand.resources.brick) {
+              sum += players[i].hand.resources.brick;
+              players[i].hand.resources.brick = 0;
             }
             break;
         }
       }
     }
-    player.hand.development.monopoly--
+    player.hand.development.monopoly--;
     switch (resource) {
       case 'grain':
-        player.hand.resources.grain += sum
+        player.hand.resources.grain += sum;
         break;
       case 'wool':
-        player.hand.resources.wool += sum
+        player.hand.resources.wool += sum;
         break;
       case 'ore':
-        player.hand.resources.ore += sum
+        player.hand.resources.ore += sum;
         break;
       case 'lumber':
-        player.hand.resources.lumber += sum
+        player.hand.resources.lumber += sum;
         break;
       case 'brick':
-        player.hand.resources.brick += sum
+        player.hand.resources.brick += sum;
         break;
     }
   }
@@ -399,6 +360,24 @@ export default class State {
           break;
       }
     }
+  }
+
+  // Tecnical checks and events
+  #isAnyResourse(res) {
+    return res.brick + res.grain + res.lumber + res.ore + res.wool;
+  }
+
+  #chooseRandomResourse(res) {
+    const randomNumber = new MapGenerator().randomNumber;
+    const resources = ["grain", "wool", "ore", "lumber", "brick"];
+    let chosen = 0;
+    let i;
+    do {
+      i = Math.floor(Math.random() * 5);
+      chosen = res[resources[i]];
+    }
+    while (!chosen)
+    return resources[i];
   }
 
   transferOneToAnother(player, victimColor) {

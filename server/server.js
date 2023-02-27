@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
                     id: socket.id,
                     ready: false,
                 }],
-                colors: ['red', 'blue', 'orange', 'green'],
+                colors: ['red', 'blue', 'green', 'orange'],
                 hideBank: true,
                 friendlyRobber: true,
                 gameMode: 'classic',
@@ -206,7 +206,7 @@ io.on("connection", (socket) => {
     })
 
     socket.on('setRobber', (player, id, room, knights) =>{
-        const sett = allGame.get(room).setRobber(player, id)
+        const settlementsToRob = allGame.get(room).setRobber(allGame.get(room).mapObject, id)
         const index = allGame.get(room).playersInfo.findIndex(findUser => findUser.name === player.name)
         if(knights) {
             allGame.get(room).playersInfo[index].hand.development.knights -=1
@@ -215,18 +215,21 @@ io.on("connection", (socket) => {
         }
         io.to(room).emit('Change-playerInfo', allGame.get(room).playersInfo)
         io.to(room).emit('renderFullMapView', allGame.get(room).mapObject)
-        socket.emit('take-one-res', sett)
+        socket.emit('take-one-res', settlementsToRob)
     })
+
     socket.on('robberCheckCards',(room) =>{
         allGame.get(room).countCardRobber(allGame.get(room).playersInfo)
         io.to(room).emit('Change-playerInfo', allGame.get(room).playersInfo)
     })
+
     socket.on('transfer-one-to-another', (player, room, color) =>{
         const index = allGame.get(room).playersInfo.findIndex(findUser => findUser.name === player.name)
         allGame.get(room).transferOneToAnother(player, color)
         allGame.get(room).playersInfo[index] = player
         io.to(room).emit('Change-playerInfo', allGame.get(room).playersInfo)
     })
+
     socket.on('updateHand', (player, room) =>{
         const index = allGame.get(room).playersInfo.findIndex(findUser => findUser.name === player.name)
         allGame.get(room).playersInfo[index] = player
@@ -275,6 +278,7 @@ io.on("connection", (socket) => {
             (roll[0] + roll[1]),
             allGame.get(room).mapObject,
             allGame.get(room).playersInfo);
+        socket.to(room).emit("displayDiceState", roll);
     });
 
     socket.on('playMonopolyCard', (room, player, resource) =>{
